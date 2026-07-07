@@ -21,5 +21,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    processAllSamples(samples, header.record_count);
+
     return 0;
 }

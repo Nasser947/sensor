@@ -8,6 +8,8 @@
 #define EXPECTED_VERSION   1
 #define EXPECTED_CHANNELS  4
 #define EXPECTED_SAMPLE_RATE 1000
+#define VREF               3.3f
+#define ADC_MAX            4095.0f
 
 #pragma pack(push, 1)
 
@@ -43,5 +45,8 @@ typedef struct
     float temperature_c;
 
 } ADCSample;
+
+void processAllSamples(ADCSample *samples,
+                       uint32_t recordCount);
 
 #endif
