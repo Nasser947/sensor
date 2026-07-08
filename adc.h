@@ -46,6 +46,21 @@ typedef struct
 
 } ADCSample;
 
+typedef struct
+{
+    float mean;
+    float minimum;
+    float maximum;
+    float std_dev;
+
+    int sample_count;
+
+    int over_voltage_count;
+    int under_voltage_count;
+    int sensor_fault_count;
+
+} ChannelStats;
+
 void processAllSamples(ADCSample *samples,
                        uint32_t recordCount);
 

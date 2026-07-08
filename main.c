@@ -3,11 +3,14 @@
 
 #include "adc.h"
 #include "io.h"
+#include "stats.h"
 
 int main(int argc, char *argv[])
 {
     FileHeader header;
     ADCSample *samples = NULL;
+
+    ChannelStats stats[EXPECTED_CHANNELS];
 
     if (argc != 2)
     {
@@ -22,6 +25,11 @@ int main(int argc, char *argv[])
     }
 
     processAllSamples(samples, header.record_count);
+
+    calculateStatistics(samples,
+                        header.record_count,
+                        stats,
+                        header.channel_count);
 
     return 0;
 }
