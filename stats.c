@@ -103,3 +103,37 @@ void calculateStatistics(ADCSample *samples,
         }
     }
 }
+
+void detectFaults(ADCSample *samples,
+                  uint32_t recordCount,
+                  ChannelStats stats[])
+{
+    ADCSample *ptr = samples;
+
+    for (uint32_t i = 0; i < recordCount; i++, ptr++)
+    {
+        uint8_t channel = ptr->record.channel_id;
+
+        if (channel >= EXPECTED_CHANNELS)
+        {
+            continue;
+        }
+
+        float voltage = ptr->voltage;
+
+        if (voltage > 3.0f)
+        {
+            stats[channel].over_voltage_count++;
+        }
+
+        if (voltage < 0.3f)
+        {
+            stats[channel].under_voltage_count++;
+        }
+
+        if (ptr->record.status_flags & 0x01)
+        {
+            stats[channel].sensor_fault_count++;
+        }
+    }
+}

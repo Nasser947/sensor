@@ -11,4 +11,8 @@ void calculateStatistics(ADCSample *samples,
                          ChannelStats stats[],
                          uint16_t channelCount);
 
+void detectFaults(ADCSample *samples,
+                  uint32_t recordCount,
+                  ChannelStats stats[]);
+
 #endif

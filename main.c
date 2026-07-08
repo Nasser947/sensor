@@ -31,5 +31,9 @@ int main(int argc, char *argv[])
                         stats,
                         header.channel_count);
 
+    detectFaults(samples,
+                 header.record_count,
+                 stats);
+
     return 0;
 }
