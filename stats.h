@@ -15,4 +15,9 @@ void detectFaults(ADCSample *samples,
                   uint32_t recordCount,
                   ChannelStats stats[]);
 
+void checkSamplingIntegrity(ADCSample *samples,
+                            uint32_t recordCount,
+                            int *missingRecords,
+                            int *outOfOrderRecords);
+
 #endif

@@ -12,6 +12,9 @@ int main(int argc, char *argv[])
 
     ChannelStats stats[EXPECTED_CHANNELS];
 
+    int missingRecords = 0;
+    int outOfOrderRecords = 0;
+
     if (argc != 2)
     {
         printf("Usage: %s <input_file.bin>\n", argv[0]);
@@ -35,5 +38,10 @@ int main(int argc, char *argv[])
                  header.record_count,
                  stats);
 
+    
+    checkSamplingIntegrity(samples,
+                           header.record_count,
+                           &missingRecords,
+                           &outOfOrderRecords);
     return 0;
 }

@@ -137,3 +137,39 @@ void detectFaults(ADCSample *samples,
         }
     }
 }
+
+void checkSamplingIntegrity(ADCSample *samples,
+                            uint32_t recordCount,
+                            int *missingRecords,
+                            int *outOfOrderRecords)
+{
+    ADCSample *ptr = samples;
+
+    *missingRecords = 0;
+    *outOfOrderRecords = 0;
+
+    if (recordCount < 2)
+    {
+        return;
+    }
+
+    uint32_t expectedSeq = ptr->record.sequence_number;
+    ptr++;
+
+    for (uint32_t i = 1; i < recordCount; i++, ptr++)
+    {
+        uint32_t currentSeq = ptr->record.sequence_number;
+
+        if (currentSeq > expectedSeq + 1)
+        {
+            *missingRecords += (currentSeq - expectedSeq - 1);
+        }
+
+        if (currentSeq < expectedSeq)
+        {
+            (*outOfOrderRecords)++;
+        }
+
+        expectedSeq = currentSeq;
+    }
+}
