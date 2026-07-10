@@ -24,4 +24,8 @@ void calculateSlidingAverage(ADCSample *samples,
                              uint32_t recordCount,
                              uint16_t windowSize);
 
+void generateHistogram(ADCSample *samples,
+                       uint32_t recordCount,
+                       int histogram[10]);
+
 #endif

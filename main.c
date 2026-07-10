@@ -47,5 +47,10 @@ int main(int argc, char *argv[])
     calculateSlidingAverage(samples,
                             header.record_count,
                             10);
+
+    int histogram[10] = {0};
+    generateHistogram(samples,
+                      header.record_count,
+                      histogram);
     return 0;
 }

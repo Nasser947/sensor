@@ -206,3 +206,32 @@ void calculateSlidingAverage(ADCSample *samples,
         ptr++;
     }
 }
+
+void generateHistogram(ADCSample *samples,
+                       uint32_t recordCount,
+                       int histogram[10])
+{
+    for (int i = 0; i < 10; i++)
+    {
+        histogram[i] = 0;
+    }
+
+    ADCSample *ptr = samples;
+
+    for (uint32_t i = 0; i < recordCount; i++, ptr++)
+    {
+        int bin = (int)((ptr->voltage / VREF) * 10.0f);
+
+        if (bin < 0)
+        {
+            bin = 0;
+        }
+
+        if (bin > 9)
+        {
+            bin = 9;
+        }
+
+        histogram[bin]++;
+    }
+}
