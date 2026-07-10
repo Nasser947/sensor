@@ -63,6 +63,22 @@ int main(int argc, char *argv[])
     calculateSlidingAverage(samples, header.record_count, windowSize, slidingAverages);
     generateHistogram(samples, header.record_count, histogram);
     analyseTemperature(samples, header.record_count, stats, header.channel_count);
-    
+
+    writeResultsReport("results.txt",
+                       &header,
+                       stats,
+                       header.channel_count,
+                       missingRecords,
+                       outOfOrderRecords,
+                       slidingAverages,
+                       header.record_count,
+                       histogram);
+
+    writeFaultReport("fault_report.txt", samples, header.record_count);
+
+    free(slidingAverages);
+    freeSamples(samples);
+
+    printf("\nProcessing complete.\n");
     return 0;
 }

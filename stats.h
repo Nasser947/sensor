@@ -34,4 +34,18 @@ void analyseTemperature(ADCSample *samples,
                         ChannelStats stats[],
                         uint16_t channelCount);
 
+void writeResultsReport(const char *filename,
+                        const FileHeader *header,
+                        ChannelStats stats[],
+                        uint16_t channelCount,
+                        int missingRecords,
+                        int outOfOrderRecords,
+                        const float *slidingAverages,
+                        uint32_t recordCount,
+                        const int histogram[EXPECTED_CHANNELS][10]);
+
+void writeFaultReport(const char *filename,
+                      ADCSample *samples,
+                      uint32_t recordCount);
+
 #endif

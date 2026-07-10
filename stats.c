@@ -325,3 +325,148 @@ void analyseTemperature(ADCSample *samples,
         }
     }
 }
+
+void writeResultsReport(const char *filename,
+                        const FileHeader *header,
+                        ChannelStats stats[],
+                        uint16_t channelCount,
+                        int missingRecords,
+                        int outOfOrderRecords,
+                        const float *slidingAverages,
+                        uint32_t recordCount,
+                        const int histogram[EXPECTED_CHANNELS][10])
+{
+    FILE *fp = fopen(filename, "w");
+
+    if (fp == NULL)
+    {
+        printf("Error: Cannot create report file.\n");
+        return;
+    }
+
+    fprintf(fp, "=====================================\n");
+    fprintf(fp, "        ADC ANALYSIS REPORT\n");
+    fprintf(fp, "=====================================\n\n");
+    fprintf(fp, "FILE HEADER\n");
+    fprintf(fp, "-------------------------------------\n");
+    fprintf(fp, "Magic Number   : 0x%X\n", header->magic);
+    fprintf(fp, "Version        : %u\n", header->version);
+    fprintf(fp, "Channels       : %u\n", header->channel_count);
+    fprintf(fp, "Record Count   : %u\n", header->record_count);
+    fprintf(fp, "Sample Rate    : %u Hz\n\n", header->sample_rate_hz);
+
+    for (uint16_t i = 0; i < channelCount; i++)
+    {
+        fprintf(fp, "CHANNEL %u\n", i);
+        fprintf(fp, "-------------------------------------\n");
+        fprintf(fp, "Samples            : %d\n", stats[i].sample_count);
+        fprintf(fp, "Mean Voltage       : %.3f V\n", stats[i].mean);
+        fprintf(fp, "Minimum Voltage    : %.3f V\n", stats[i].minimum);
+        fprintf(fp, "Maximum Voltage    : %.3f V\n", stats[i].maximum);
+        fprintf(fp, "Std Deviation      : %.3f V\n", stats[i].std_dev);
+        fprintf(fp, "Overvoltage Faults : %d\n", stats[i].over_voltage_count);
+        fprintf(fp, "Undervoltage Faults: %d\n", stats[i].under_voltage_count);
+        fprintf(fp, "Sensor Faults      : %d\n", stats[i].sensor_fault_count);
+        fprintf(fp, "Temp Min (C)       : %.2f\n", stats[i].temp_min);
+        fprintf(fp, "Temp Mean (C)      : %.2f\n", stats[i].temp_mean);
+        fprintf(fp, "Temp Max (C)       : %.2f\n", stats[i].temp_max);
+        fprintf(fp, "High Temp Records  : %d\n\n", stats[i].high_temperature_count);
+    }
+
+    fprintf(fp, "HISTOGRAM OUTPUT (10 bins over 0-3.3V)\n");
+    fprintf(fp, "-------------------------------------\n");
+    for (uint16_t channel = 0; channel < channelCount; channel++)
+    {
+        fprintf(fp, "Channel %u: ", channel);
+        for (int bin = 0; bin < 10; bin++)
+        {
+            fprintf(fp, "%d%s", histogram[channel][bin], (bin == 9) ? "\n" : " ");
+        }
+    }
+
+    fprintf(fp, "\nSLIDING WINDOW AVERAGES\n");
+    fprintf(fp, "-------------------------------------\n");
+    if (slidingAverages != NULL && recordCount > 0)
+    {
+        for (uint32_t i = 0; i < recordCount; i++)
+        {
+            fprintf(fp, "Record %u: %.3f V\n", i, slidingAverages[i]);
+        }
+    }
+    else
+    {
+        fprintf(fp, "No rolling averages available.\n");
+    }
+
+    fprintf(fp, "\nSAMPLING INTEGRITY\n");
+    fprintf(fp, "-------------------------------------\n");
+    fprintf(fp, "Missing Records    : %d\n", missingRecords);
+    fprintf(fp, "Out of Order       : %d\n", outOfOrderRecords);
+    fprintf(fp, "\n=====================================\n");
+
+    fclose(fp);
+    printf("Results report written to %s\n", filename);
+}
+
+void writeFaultReport(const char *filename,
+                      ADCSample *samples,
+                      uint32_t recordCount)
+{
+    FILE *fp = fopen(filename, "w");
+
+    if (fp == NULL)
+    {
+        printf("Error: Cannot create fault report.\n");
+        return;
+    }
+
+    fprintf(fp, "=====================================\n");
+    fprintf(fp, "          FAULT REPORT\n");
+    fprintf(fp, "=====================================\n\n");
+    fprintf(fp, "Timestamp | Channel | Voltage | Temperature | Fault Type\n");
+    fprintf(fp, "---------------------------------------------------------\n");
+
+    ADCSample *ptr = samples;
+
+    for (uint32_t i = 0; i < recordCount; i++, ptr++)
+    {
+        if (ptr->voltage > 3.0f)
+        {
+            fprintf(fp, "%8.3f | %7u | %7.3f | %10.2f | Overvoltage\n",
+                    ptr->timestamp,
+                    ptr->channel_id,
+                    ptr->voltage,
+                    ptr->temperature);
+        }
+
+        if (ptr->voltage < 0.3f)
+        {
+            fprintf(fp, "%8.3f | %7u | %7.3f | %10.2f | Undervoltage\n",
+                    ptr->timestamp,
+                    ptr->channel_id,
+                    ptr->voltage,
+                    ptr->temperature);
+        }
+
+        if (ptr->status_flags & 0x01)
+        {
+            fprintf(fp, "%8.3f | %7u | %7.3f | %10.2f | Sensor Fault\n",
+                    ptr->timestamp,
+                    ptr->channel_id,
+                    ptr->voltage,
+                    ptr->temperature);
+        }
+
+        if (ptr->temperature > 60.0f)
+        {
+            fprintf(fp, "%8.3f | %7u | %7.3f | %10.2f | High Temperature\n",
+                    ptr->timestamp,
+                    ptr->channel_id,
+                    ptr->voltage,
+                    ptr->temperature);
+        }
+    }
+
+    fprintf(fp, "\n=====================================\n");
+    fclose(fp);
+}
