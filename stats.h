@@ -20,4 +20,8 @@ void checkSamplingIntegrity(ADCSample *samples,
                             int *missingRecords,
                             int *outOfOrderRecords);
 
+void calculateSlidingAverage(ADCSample *samples,
+                             uint32_t recordCount,
+                             uint16_t windowSize);
+
 #endif

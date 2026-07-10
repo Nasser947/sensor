@@ -43,5 +43,9 @@ int main(int argc, char *argv[])
                            header.record_count,
                            &missingRecords,
                            &outOfOrderRecords);
+
+    calculateSlidingAverage(samples,
+                            header.record_count,
+                            10);
     return 0;
 }

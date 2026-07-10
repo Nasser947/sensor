@@ -173,3 +173,36 @@ void checkSamplingIntegrity(ADCSample *samples,
         expectedSeq = currentSeq;
     }
 }
+
+void calculateSlidingAverage(ADCSample *samples,
+                             uint32_t recordCount,
+                             uint16_t windowSize)
+{
+    if (windowSize == 0 || recordCount == 0)
+    {
+        return;
+    }
+
+    ADCSample *ptr = samples;
+
+    for (uint32_t i = 0; i < recordCount; i++)
+    {
+        float sum = 0.0f;
+        uint32_t count = 0;
+
+        ADCSample *windowPtr = ptr;
+
+        for (uint32_t j = 0;
+             j < windowSize && (i + j) < recordCount;
+             j++, windowPtr++)
+        {
+            if (windowPtr->record.channel_id == ptr->record.channel_id)
+            {
+                sum += windowPtr->voltage;
+                count++;
+            }
+        }
+
+        ptr++;
+    }
+}
