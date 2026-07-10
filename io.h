@@ -7,4 +7,7 @@ int readBinaryFile(const char *filename,
                    FileHeader *header,
                    ADCSample **samples);
 
+
+void freeSamples(ADCSample *samples);
+
 #endif

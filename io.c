@@ -7,20 +7,12 @@ int readBinaryFile(const char *filename,
                    FileHeader *header,
                    ADCSample **samples)
 {
-    FILE *fp;
-
-    ADCRecord *records;
-
-    fp = fopen(filename, "rb");
+    FILE *fp = fopen(filename, "rb");
 
     if (fp == NULL)
     {
         printf("Error: Unable to open file %s\n", filename);
         return 0;
-    }
-    else
-    {
-        printf("File %s opened successfully.\n", filename);
     }
 
     if (fread(header, sizeof(FileHeader), 1, fp) != 1)
@@ -67,23 +59,36 @@ int readBinaryFile(const char *filename,
         return 0;
     }
 
-    records = (ADCRecord *)(*samples);
-
-    if (fread(records,
-              sizeof(ADCRecord),
-              header->record_count,
-              fp) != header->record_count)
+    for (uint32_t i = 0; i < header->record_count; i++)
     {
-        printf("Error reading records.\n");
+        ADCRecord rawRecord;
 
-        free(*samples);
-        *samples = NULL;
+        if (fread(&rawRecord, sizeof(ADCRecord), 1, fp) != 1)
+        {
+            printf("Error reading records.\n");
+            free(*samples);
+            *samples = NULL;
+            fclose(fp);
+            return 0;
+        }
 
-        fclose(fp);
-        return 0;
+        (*samples)[i].timestamp = rawRecord.timestamp;
+        (*samples)[i].channel_id = rawRecord.channel_id;
+        (*samples)[i].raw_value = rawRecord.raw_value;
+        (*samples)[i].voltage = adcToVoltage(rawRecord.raw_value);
+        (*samples)[i].temperature = temperatureToCelsius(rawRecord.temperature);
+        (*samples)[i].status_flags = rawRecord.status_flags;
+        (*samples)[i].sequence_number = rawRecord.sequence_number;
     }
 
     fclose(fp);
-
     return 1;
+}
+
+void freeSamples(ADCSample *samples)
+{
+    if (samples != NULL)
+    {
+        free(samples);
+    }
 }

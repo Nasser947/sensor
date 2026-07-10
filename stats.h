@@ -22,10 +22,16 @@ void checkSamplingIntegrity(ADCSample *samples,
 
 void calculateSlidingAverage(ADCSample *samples,
                              uint32_t recordCount,
-                             uint16_t windowSize);
+                             uint16_t windowSize,
+                             float *slidingAverages);
 
 void generateHistogram(ADCSample *samples,
                        uint32_t recordCount,
-                       int histogram[10]);
+                       int histogram[EXPECTED_CHANNELS][10]);
+
+void analyseTemperature(ADCSample *samples,
+                        uint32_t recordCount,
+                        ChannelStats stats[],
+                        uint16_t channelCount);
 
 #endif
