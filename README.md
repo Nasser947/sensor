@@ -43,4 +43,4 @@ This produces an executable named `sensor` in the current directory.
 https://github.com/Nasser947/sensor
 
 ## Submission
-- A logbook.pdf
+- logbook.docx
